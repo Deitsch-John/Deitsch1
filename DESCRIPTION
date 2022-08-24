@@ -12,3 +12,5 @@ Imports:
     dplyr,
     sf,
     utils
+URL: https://github.com/Deitsch-John/Deitsch1
+BugReports: https://github.com/Deitsch-John/Deitsch1/issues
