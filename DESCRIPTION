@@ -10,7 +10,10 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
 Imports: 
     dplyr,
+    ggplot2,
+    ggspatial,
     sf,
+    stringr,
     utils
 URL: https://github.com/Deitsch-John/Deitsch1
 BugReports: https://github.com/Deitsch-John/Deitsch1/issues
