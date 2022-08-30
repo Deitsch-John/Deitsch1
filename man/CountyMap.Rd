@@ -2,7 +2,7 @@
 % Please edit documentation in R/CountyMap.R
 \name{CountyMap}
 \alias{CountyMap}
-\title{Title}
+\title{map county-level occurence of a species in any US state}
 \usage{
 CountyMap(
   dataframe,
@@ -10,7 +10,8 @@ CountyMap(
   species_to_map,
   county_shapefile,
   state_col,
-  state_to_map
+  state_to_map,
+  crs_map
 )
 }
 \arguments{
@@ -25,13 +26,15 @@ CountyMap(
 \item{state_col}{state column in the counties object}
 
 \item{state_to_map}{state that is to be mapped}
+
+\item{crs_map}{CRS system to use for observation data and county shapefile}
 }
 \value{
 a ggplot object
 }
 \description{
-Title
+map county-level occurence of a species in any US state
 }
 \examples{
-CountyMap(frog_obs_iNat, Species, "Green Tree Frog", USAcounties, State, "GA")
+'CountyMap(frog_obs_iNat, Species, "Green Tree Frog", USAcounties, State, "GA", 4269)'
 }

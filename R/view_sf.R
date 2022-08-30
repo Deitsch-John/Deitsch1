@@ -9,7 +9,7 @@
 #' @examples view_sf(USA_counties)
 view_sf <- function(df){
 
-  df%>%
-    st_drop_geometry()%>%
-    View()
+  df %>%
+    sf::st_drop_geometry( )%>%
+    utils::View()
 }
