@@ -10,7 +10,10 @@ RangeMap_points(
   species_to_map,
   background_map,
   greatlakes_map,
-  crs_map
+  crs_map,
+  color_background = "White",
+  color_points = "Black",
+  alpha_points = 0.8
 )
 }
 \arguments{
@@ -25,6 +28,12 @@ RangeMap_points(
 \item{greatlakes_map}{an sf object of the Great Lakes}
 
 \item{crs_map}{CRS system to use for observation data and background maps}
+
+\item{color_background}{fill color of background, defaults to white, wrap with ""}
+
+\item{color_points}{color of points, defaults to black, wrap with ""}
+
+\item{alpha_points}{transparency of points, defaults to 0.8}
 }
 \value{
 a ggplot object

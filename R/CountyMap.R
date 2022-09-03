@@ -1,4 +1,4 @@
-#' map county-level occurence of a species in any US state
+#' produces sf datafrane with county level presence/absence data
 #'
 #' @param dataframe an sf dataframe with a geometry column consisting of coordinates for each observation
 #' @param species_col column in the dataframe identifying the species of each observation
@@ -6,50 +6,88 @@
 #' @param county_shapefile a sf object of the counties of the United States
 #' @param state_col state column in the counties object
 #' @param state_to_map state that is to be mapped
-#' @param crs_map CRS system to use for observation data and county shapefile
+#' @param crs_map CRS to use for observation data and county shapefile
+#' @param ... additional states to be mapped, optional
+#' @return a spatial dataframe
+#' @export
+#'
+#' @examples 'CountyMap_df(frog_obs_iNat, Species, "Green Tree Frog", 4269, USAcounties, State, "GA")'
+CountyMap_df <- function(dataframe, species_col, species_to_map, crs_map,
+                      county_shapefile, state_col, state_to_map, ...) {
+
+  sf::st_crs(dataframe)=4269
+  sf::st_crs(county_shapefile)=4269
+
+  Species_observations <- dataframe %>%
+    dplyr::filter({{species_col}}==species_to_map)
+
+  Counties <- county_shapefile %>%
+    dplyr::filter({{state_col}}%in%c(state_to_map, ...))%>%
+    dplyr::mutate(CountyState = stringr::str_c(COUNTYNAME, STATE, sep = ", "))
+
+  Counties.t <- sf::st_transform(Counties, crs = crs_map)
+  Species_observations.t <- sf::st_transform(Species_observations, crs = crs_map)
+
+  Species_Counties <- sf::st_join(Species_observations.t, Counties.t)%>%
+    sf::st_drop_geometry()%>%
+    dplyr::group_by(CountyState)%>%
+    dplyr::summarize(Observations = dplyr::n())%>%
+    dplyr::filter(!is.na(CountyState))
+
+  Species_presence <- Counties.t %>%
+    dplyr::left_join(Species_Counties)%>%
+    dplyr::mutate(Presence = ifelse(is.na(Observations), "No", "Yes"))
+
+  return(Species_presence)
+}
+
+
+#' maps county level presence/absence data
+#'
+#' @param dataframe an sf dataframe with presence/absence data for each county, generated with CountyMap_df
+#' @param state_col state column in the counties object
+#' @param state_to_map state that is to be mapped, wrap with ""
+#' @param county_shapefile a sf object of the counties of the United States
+#' @param ... additional states to be mapped, optional
+#' @param color_present fill color for counties with species, defaults to green, wrap with ""
+#' @param color_absent fill color for counties without species, defaults to ivory, wrap with ""
+#' @param color_background fill color of background, defaults to white, wrap with ""
+#' @param color_county_border color of county borders, defaults to light gray, wrap with ""
+#' @param color_state_border color of state borders, defaults to dark gray, wrap with ""
+#' @param crs_map CRS to use for observation data and county shapefile, needs to match value inputted into CountyMap_df if two functions used in tandem
 #'
 #' @return a ggplot object
 #' @export
 #'
-#' @examples 'CountyMap(frog_obs_iNat, Species, "Green Tree Frog", USAcounties, State, "GA", 4269)'
-CountyMap <- function(dataframe, species_col, species_to_map,
-                      county_shapefile, state_col, state_to_map, crs_map) {
+#' @examples 'CountyMap_map(frog_pres, USAcounties, State, "GA", c("NC", "SC"))'
+CountyMap_map <- function(dataframe, county_shapefile, crs_map, state_col, state_to_map, ...,
+                          color_present = "seagreen3", color_absent = "ivory1",
+                          color_background = "White", color_county_border = "grey41",
+                          color_state_border = "grey10"){
 
-  Species_observations <- dataframe %>%
-    dplyr::filter(species_col==species_to_map)
+  State_Outlines <- county_shapefile %>%
+    sf::st_transform(., crs = crs_map)%>%
+    dplyr::filter({{ state_col }}%in%c(state_to_map, ...))%>%
+    dplyr::group_by({{ state_col }})%>%
+    dplyr::summarise()
 
-  Counties <- county_shapefile %>%
-    dplyr::filter(state_col==state_to_map)
+  attach(dataframe)
 
-  Counties.t <- sf::st_transform(Counties, crs = crs_map)
-  Species_observations.t <- sf::st_transform(Species_observations, crs = sf::st_crs(Counties.t))
-
-  Species_Counties <- sf::st_join(Species_observations.t, Counties.t)%>%
-    sf::st_drop_geometry()%>%
-    dplyr::group_by(COUNTYNAME)%>%
-    dplyr::summarize(Observations = dplyr::n())%>%
-    dplyr::filter(!is.na(COUNTYNAME))
-
-  Species_presence <- Counties.t %>%
-    dplyr::left_join(Species_Counties)%>%
-    dplyr::mutate(Present = ifelse(is.na(Observations), "No", "Yes"))
-
-  SpeciesMap <- ggplot2::ggplot()+
-    ggplot2::geom_sf(data = Species_presence,
-            fill = ifelse(Present=="Yes", "seagreen3", "ivory1"),
-            color = "grey41",
-            size = 0.10)+
-    ggplot2::geom_sf(data = sf::st_union(Counties),
-            fill = NA,
-            color = "grey10",
-            size = 0.5)+
+  Map <- ggplot2::ggplot()+
+    ggplot2::geom_sf(data = dataframe,
+                     fill = ifelse({{Presence}}=="Yes", color_present, color_absent),
+                     color = color_county_border,
+                     size = 0.10)+
+    ggplot2::geom_sf(data = State_Outlines,
+                     fill = NA,
+                     color = color_state_border,
+                     size = 0.5)+
     ggplot2::theme(
       panel.grid.major = ggplot2::element_blank(),
-      panel.background = ggplot2::element_rect(fill = "aliceblue"),
-      panel.border = ggplot2::element_rect(fill = NA, size = 2))+
-    ggspatial::annotation_scale(location="bl")+
-    ggspatial::annotation_north_arrow(which_north = "true",
-                           style = north_arrow_nautical,
-                           location = "tr")
-  return(SpeciesMap)
+      panel.background = ggplot2::element_rect(fill = color_background),
+      panel.border = ggplot2::element_rect(fill = NA, size = 2))
+
+  detach(dataframe)
+
+  return(Map)
 }

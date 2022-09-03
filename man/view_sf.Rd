@@ -16,5 +16,5 @@ nothing
 view a spatial dataframe in the R studio viewer
 }
 \examples{
-view_sf(USA_counties)
+'view_sf(USA_counties)'
 }
