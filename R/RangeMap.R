@@ -8,11 +8,14 @@
 #' @param crs_map CRS to use for observation data and background maps
 #'
 #' @return a spatial dataframe
+#' @importFrom magrittr %>%
 #' @export
 #'
 #' @examples 'RangeMap(frog_obs_iNat, Species, "Green Tree Frog", NorthAmerica, GreatLakes, 26917)'
 RangeMap_df <- function(dataframe, species_col, species_to_map,
                       background_map, greatlakes_map, crs_map) {
+
+  country <- NAME <- . <- NULL
 
   sf::sf_use_s2(FALSE)
 
@@ -33,7 +36,7 @@ RangeMap_df <- function(dataframe, species_col, species_to_map,
     sf::st_transform(., crs = crs_map)
 
   Species_observations <- dataframe %>%
-    dplyr::filter(species_col==species_to_map)%>%
+    dplyr::filter({{species_col}}==species_to_map)%>%
     sf::st_transform(., crs = crs_map)
 
   Species_range <- Species_observations %>%
@@ -64,12 +67,15 @@ RangeMap_df <- function(dataframe, species_col, species_to_map,
 #' @param alpha_range transparency of range, defaults to 0.4
 #'
 #' @return ggplot object
+#' @importFrom magrittr %>%
 #' @export
 #'
 #' @examples 'RangeMap_map(range, NorthAmerica, GreatLakes, 5070)'
 RangeMap_map <- function(dataframe, background_map, greatlakes_map, crs_map,
                          color_background = "White", color_range = "forestgreen",
                          alpha_range = 0.4){
+
+  country <- NAME <- . <- NULL
 
   sf::sf_use_s2(FALSE)
 

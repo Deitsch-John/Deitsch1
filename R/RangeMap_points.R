@@ -11,6 +11,7 @@
 #' @param alpha_points transparency of points, defaults to 0.8
 #'
 #' @return a ggplot object
+#' @importFrom magrittr %>%
 #' @export
 #'
 #' @examples 'RangeMap_points(frog_obs_iNat, Species, "Green Tree Frog", NorthAmerica, GreatLakes, 26917)'
@@ -18,6 +19,8 @@ RangeMap_points <- function(dataframe, species_col, species_to_map,
                      background_map, greatlakes_map, crs_map,
                      color_background = "White", color_points = "Black",
                      alpha_points = 0.8) {
+
+  country <- NAME <- . <- NULL
 
   sf::sf_use_s2(FALSE)
 

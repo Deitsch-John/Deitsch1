@@ -11,6 +11,7 @@ CountyMap_df(
   crs_map,
   county_shapefile,
   state_col,
+  county_col,
   state_to_map,
   ...
 )
@@ -26,7 +27,9 @@ CountyMap_df(
 
 \item{county_shapefile}{a sf object of the counties of the United States}
 
-\item{state_col}{state column in the counties object}
+\item{state_col}{state column in the counties object (county_shapefile)}
+
+\item{county_col}{county column in the counties object (county_shapefile)}
 
 \item{state_to_map}{state that is to be mapped}
 
